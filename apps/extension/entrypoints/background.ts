@@ -13,6 +13,7 @@ import { readSettings, updateSettings } from "../src/settings/repository";
 import {
   executeSessionCommand,
   recordEvaluation,
+  recordOverride,
   reconcilePersistedSession,
 } from "../src/session/controller";
 import { remainingMs } from "../src/session/model";
@@ -58,6 +59,15 @@ export default defineBackground(() => {
     }
     if (request.kind === "page.evaluate") {
       return evaluatePage(request.page);
+    }
+    if (request.kind === "intervention.allow") {
+      const page = pageContextSchema.pick({ hostname: true, title: true }).safeParse(request.page);
+      if (!page.success || typeof request.evaluationId !== "string") {
+        return Promise.resolve({ ok: false, error: "Invalid override" } satisfies ExtensionRuntimeResponse);
+      }
+      return recordOverride(page.data).then(
+        () => ({ ok: true, action: { type: "allow" } } satisfies ExtensionRuntimeResponse),
+      );
     }
     if (request.kind === "settings.get") {
       return readSettings().then((settings) => ({ ok: true, settings }) satisfies ExtensionRuntimeResponse);

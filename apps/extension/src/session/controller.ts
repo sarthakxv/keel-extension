@@ -82,6 +82,9 @@ export async function executeSessionCommand(command: SessionCommand): Promise<Ru
         case "session.end":
           next = endSnapshot(current, now);
           break;
+        case "session.reset":
+          next = { status: "idle" };
+          break;
         case "session.get":
           next = current;
           break;
@@ -92,6 +95,33 @@ export async function executeSessionCommand(command: SessionCommand): Promise<Ru
       const message = error instanceof Error ? error.message : "Unable to update focus session";
       return { ok: false, error: message };
     }
+  });
+}
+
+export async function recordOverride(
+  example: { hostname: string; title: string },
+  now = Date.now(),
+): Promise<SessionSnapshot> {
+  return enqueue(async () => {
+    const current = reconcileSnapshot(await readSession(), now);
+    if (current.status !== "running") return current;
+    const withoutDuplicate = current.session.allowedExamples.filter(
+      (item) => item.hostname !== example.hostname || item.title !== example.title,
+    );
+    const next: SessionSnapshot = {
+      status: "running",
+      session: {
+        ...current.session,
+        revision: current.session.revision + 1,
+        allowedExamples: [...withoutDuplicate, example].slice(-3),
+        stats: {
+          ...current.session.stats,
+          overrides: current.session.stats.overrides + 1,
+        },
+      },
+    };
+    await persist(next);
+    return next;
   });
 }
 

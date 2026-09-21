@@ -33,6 +33,7 @@ export type SessionCommand =
   | { type: "session.pause" }
   | { type: "session.resume" }
   | { type: "session.end" }
+  | { type: "session.reset" }
   | { type: "session.get" };
 
 export type RuntimeRequest = {
@@ -111,6 +112,11 @@ export interface ExtensionSettings {
 export type ExtensionRuntimeRequest =
   | RuntimeRequest
   | { kind: "page.evaluate"; page: PageContext }
+  | {
+      kind: "intervention.allow";
+      evaluationId: string;
+      page: Pick<PageContext, "hostname" | "title">;
+    }
   | { kind: "settings.get" }
   | { kind: "settings.update"; settings: Partial<ExtensionSettings> };
 

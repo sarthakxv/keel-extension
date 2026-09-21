@@ -208,7 +208,11 @@ export function App() {
       {error ? <p className="error" role="alert">{error}</p> : null}
       <div className="timer-actions">
         {isComplete ? (
-          <button className="primary-action" type="button" onClick={() => setSnapshot({ status: "idle" })}>
+          <button
+            className="primary-action"
+            type="button"
+            onClick={() => void run({ type: "session.reset" })}
+          >
             Start another
           </button>
         ) : (
