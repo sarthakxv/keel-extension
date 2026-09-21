@@ -142,6 +142,43 @@ fieldset {
   border: 0;
 }
 
+.beta-access {
+  margin: 18px 0 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  color: var(--graphite-soft);
+  font-size: 12px;
+}
+
+.beta-access summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.beta-access label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.beta-access input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 10px;
+  color: var(--graphite);
+  background: var(--paper-inset);
+}
+
+.beta-access p {
+  margin: 7px 0 0;
+  color: var(--graphite-faint);
+  line-height: 1.4;
+}
+
 .duration-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1.2fr;
@@ -356,4 +393,3 @@ fieldset {
     transition-duration: 0.01ms !important;
   }
 }
-

@@ -12,6 +12,7 @@ import {
   resumeSnapshot,
 } from "./model";
 import { readSession, writeSession } from "./repository";
+import { ESCALATION_WINDOW_MS } from "../evaluation/policy";
 
 let operationQueue: Promise<unknown> = Promise.resolve();
 
@@ -94,3 +95,33 @@ export async function executeSessionCommand(command: SessionCommand): Promise<Ru
   });
 }
 
+export async function recordEvaluation(
+  shouldIntervene: boolean,
+  now = Date.now(),
+): Promise<{ snapshot: SessionSnapshot; previousInterventions: number }> {
+  return enqueue(async () => {
+    const current = reconcileSnapshot(await readSession(), now);
+    if (current.status !== "running") {
+      return { snapshot: current, previousInterventions: 0 };
+    }
+    const recent = current.session.interventionTimestamps.filter(
+      (timestamp) => now - timestamp < ESCALATION_WINDOW_MS,
+    );
+    const next: SessionSnapshot = {
+      status: "running",
+      session: {
+        ...current.session,
+        revision: current.session.revision + 1,
+        interventionTimestamps: shouldIntervene ? [...recent, now] : recent,
+        stats: {
+          ...current.session.stats,
+          pagesEvaluated: current.session.stats.pagesEvaluated + 1,
+          interventionsShown:
+            current.session.stats.interventionsShown + (shouldIntervene ? 1 : 0),
+        },
+      },
+    };
+    await persist(next);
+    return { snapshot: next, previousInterventions: recent.length };
+  });
+}

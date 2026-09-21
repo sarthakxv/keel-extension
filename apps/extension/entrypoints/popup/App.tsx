@@ -1,5 +1,7 @@
 import {
   SESSION_STORAGE_KEY,
+  type ExtensionRuntimeRequest,
+  type ExtensionRuntimeResponse,
   type RuntimeRequest,
   type RuntimeResponse,
   type SessionCommand,
@@ -31,6 +33,7 @@ export function App() {
   const [snapshot, setSnapshot] = useState<SessionSnapshot>({ status: "idle" });
   const [goal, setGoal] = useState("");
   const [duration, setDuration] = useState(25);
+  const [accessToken, setAccessToken] = useState("");
   const [now, setNow] = useState(Date.now());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(true);
@@ -48,6 +51,10 @@ export function App() {
 
   useEffect(() => {
     void refresh();
+    const settingsRequest: ExtensionRuntimeRequest = { kind: "settings.get" };
+    void browser.runtime.sendMessage(settingsRequest).then((response: ExtensionRuntimeResponse) => {
+      if (response.ok && "settings" in response) setAccessToken(response.settings.accessToken);
+    });
     const clock = window.setInterval(() => setNow(Date.now()), 1_000);
     const handleStorageChange = (changes: Record<string, Browser.storage.StorageChange>) => {
       const change = changes[SESSION_STORAGE_KEY];
@@ -81,9 +88,16 @@ export function App() {
     }
   }
 
-  function handleStart(event: FormEvent<HTMLFormElement>) {
+  async function handleStart(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    void run({ type: "session.start", goal, durationMinutes: duration });
+    if (accessToken.trim()) {
+      const settingsRequest: ExtensionRuntimeRequest = {
+        kind: "settings.update",
+        settings: { accessToken: accessToken.trim() },
+      };
+      await browser.runtime.sendMessage(settingsRequest);
+    }
+    await run({ type: "session.start", goal, durationMinutes: duration });
   }
 
   if (snapshot.status === "idle") {
@@ -97,7 +111,7 @@ export function App() {
           <p className="kicker">One interval. One promise.</p>
           <h1>What deserves your full attention?</h1>
         </section>
-        <form className="session-form" onSubmit={handleStart}>
+        <form className="session-form" onSubmit={(event) => void handleStart(event)}>
           <label htmlFor="goal">Focus goal</label>
           <textarea
             id="goal"
@@ -135,6 +149,19 @@ export function App() {
               </label>
             </div>
           </fieldset>
+          <details className="beta-access">
+            <summary>Jev distraction guard</summary>
+            <label htmlFor="access-token">Beta access key</label>
+            <input
+              id="access-token"
+              type="password"
+              autoComplete="off"
+              value={accessToken}
+              onChange={(event) => setAccessToken(event.target.value)}
+              placeholder="Paste your invite key"
+            />
+            <p>The timer works without a key. Page checks stay off until one is added.</p>
+          </details>
           {error ? <p className="error" role="alert">{error}</p> : null}
           <button className="primary-action" type="submit" disabled={busy || goal.trim().length < 3}>
             Begin focus
