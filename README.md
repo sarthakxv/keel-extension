@@ -43,7 +43,7 @@ For a production build:
 pnpm test
 pnpm typecheck
 pnpm build
-pnpm --filter @focus-guardian/extension zip
+pnpm --filter @keel/extension zip
 ```
 
 Load `apps/extension/.output/chrome-mv3` as an unpacked extension from `chrome://extensions` or `brave://extensions` with Developer mode enabled.

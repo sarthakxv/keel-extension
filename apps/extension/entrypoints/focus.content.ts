@@ -3,7 +3,7 @@ import {
   type ExtensionRuntimeRequest,
   type ExtensionRuntimeResponse,
   type SessionSnapshot,
-} from "@focus-guardian/contracts";
+} from "@keel/contracts";
 import { extractPageContext } from "../src/page/extract";
 import { mountIntervention } from "../src/intervention/mount";
 import { EvaluationScheduler } from "../src/page/scheduler";

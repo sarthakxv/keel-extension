@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Keel API",
-  description: "Page evaluation for the Keel Pomodoro extension.",
+  description: "Classifies pages against the active Keel goal.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

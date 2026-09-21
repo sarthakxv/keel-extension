@@ -167,7 +167,7 @@ export function mountStatusHud() {
   function ensureHost() {
     if (host && shadow) return;
     host = document.createElement("div");
-    host.dataset.focusGuardianUi = "true";
+    host.dataset.keelUi = "true";
     shadow = host.attachShadow({ mode: "closed" });
     const style = document.createElement("style");
     style.textContent = styles;

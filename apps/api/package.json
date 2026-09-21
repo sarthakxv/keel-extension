@@ -1,5 +1,5 @@
 {
-  "name": "@focus-guardian/api",
+  "name": "@keel/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@focus-guardian/contracts": "workspace:*",
+    "@keel/contracts": "workspace:*",
     "@upstash/ratelimit": "2.1.0",
     "@upstash/redis": "1.39.0",
     "ai": "7.0.107",

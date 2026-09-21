@@ -2,7 +2,7 @@ import {
   alignmentSchema,
   type Alignment,
   type EvaluationResponse,
-} from "@focus-guardian/contracts";
+} from "@keel/contracts";
 
 export type StatusHudState =
   | { kind: "checking"; hostname: string }

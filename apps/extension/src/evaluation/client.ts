@@ -3,7 +3,7 @@ import {
   type EvaluationRequest,
   type EvaluationResponse,
   type ExtensionSettings,
-} from "@focus-guardian/contracts";
+} from "@keel/contracts";
 
 const REQUEST_TIMEOUT_MS = 4_000;
 
@@ -23,7 +23,7 @@ export async function requestEvaluation(
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-focus-installation-id": settings.installationId,
+        "x-keel-installation-id": settings.installationId,
       },
       body: JSON.stringify(request),
       signal: controller.signal,

@@ -48,7 +48,7 @@ describe("page context extraction", () => {
     document.body.innerHTML = `
       <main>
         <h1>Project research</h1>
-        <div data-focus-guardian-ui="true">Reading this page On task 84%</div>
+        <div data-keel-ui="true">Reading this page On task 84%</div>
         <p>Useful reference material for the current task.</p>
       </main>
     `;

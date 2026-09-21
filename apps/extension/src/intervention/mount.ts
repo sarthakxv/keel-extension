@@ -1,7 +1,7 @@
-import type { FocusAction } from "@focus-guardian/contracts";
+import type { InterventionAction } from "@keel/contracts";
 
 interface InterventionOptions {
-  action: Exclude<FocusAction, { type: "allow" }>;
+  action: Exclude<InterventionAction, { type: "allow" }>;
   goal: string;
   onAllow: () => void;
   onReturn: () => boolean;
@@ -115,7 +115,7 @@ function button(label: string, className: string): HTMLButtonElement {
 export function mountIntervention(options: InterventionOptions): () => void {
   const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const host = document.createElement("div");
-  host.dataset.focusGuardianUi = "true";
+  host.dataset.keelUi = "true";
   const shadow = host.attachShadow({ mode: "closed" });
   const style = document.createElement("style");
   style.textContent = styles;

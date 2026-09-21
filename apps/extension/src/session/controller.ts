@@ -3,7 +3,7 @@ import {
   type RuntimeResponse,
   type SessionCommand,
   type SessionSnapshot,
-} from "@focus-guardian/contracts";
+} from "@keel/contracts";
 import {
   createSession,
   endSnapshot,

@@ -2,7 +2,7 @@ import {
   alignmentSchema,
   type EvaluationRequest,
   type EvaluationResponse,
-} from "@focus-guardian/contracts";
+} from "@keel/contracts";
 import { experimental_evaluate as evaluate } from "ai";
 
 const questions = {
@@ -28,7 +28,23 @@ const questions = {
   },
 } as const;
 
-export async function evaluateFocusPage(
+type GatewayEnv = {
+  NODE_ENV?: string;
+  AI_GATEWAY_ZERO_DATA_RETENTION?: string;
+};
+
+export function buildJevGatewayOptions(env: GatewayEnv = process.env) {
+  const explicit = env.AI_GATEWAY_ZERO_DATA_RETENTION;
+  const zeroDataRetention =
+    explicit === "true" ? true : explicit === "false" ? false : env.NODE_ENV === "production";
+
+  return {
+    only: ["typesafe-ai"] as const,
+    ...(zeroDataRetention ? { zeroDataRetention: true } : {}),
+  };
+}
+
+export async function evaluatePage(
   input: EvaluationRequest,
   signal: AbortSignal,
 ): Promise<EvaluationResponse> {
@@ -44,20 +60,25 @@ export async function evaluateFocusPage(
     maxRetries: 0,
     abortSignal: signal,
     providerOptions: {
-      gateway: {
-        zeroDataRetention: true,
-        only: ["typesafe-ai"],
-      },
+      gateway: buildJevGatewayOptions(),
     },
   });
 
   const alignment = result.answers.alignment;
   const distraction = result.answers.likelyDistraction;
   if (alignment.type !== "choice" || distraction.type !== "boolean" || !alignment.probabilities) {
-    throw new Error("Jev returned an incomplete evaluation");
+    throw new Error(
+      `Jev returned an incomplete evaluation alignmentType=${alignment.type} distractionType=${distraction.type} hasProbabilities=${Boolean(alignment.probabilities)}`,
+    );
   }
 
-  const value = alignmentSchema.parse(alignment.choice);
+  const parsedAlignment = alignmentSchema.safeParse(alignment.choice);
+  if (!parsedAlignment.success) {
+    throw new Error(
+      `Jev returned an incomplete evaluation alignmentType=${alignment.type} invalidChoice=${String(alignment.choice)}`,
+    );
+  }
+  const value = parsedAlignment.data;
   const probabilities = Object.fromEntries(
     alignmentSchema.options.map((option) => [option, alignment.probabilities?.[option] ?? 0]),
   ) as Record<(typeof alignmentSchema.options)[number], number>;

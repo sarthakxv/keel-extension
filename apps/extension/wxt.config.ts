@@ -19,7 +19,13 @@ export default defineConfig({
   },
   manifest: {
     name: "Keel",
-    description: "A Pomodoro timer that interrupts pages that don't match your goal.",
+    description: "Set a goal. Keel interrupts you when the page isn't that work.",
+    icons: {
+      16: "/icon-16.png",
+      32: "/icon-32.png",
+      48: "/icon-48.png",
+      128: "/icon-128.png",
+    },
     permissions: ["storage", "alarms"],
     host_permissions: [`${apiOrigin}/*`],
     incognito: "not_allowed",

@@ -5,7 +5,7 @@ export const durationMinutesSchema = z.number().int().min(5).max(180);
 
 export type SessionStatus = "idle" | "running" | "paused" | "completed";
 
-export interface FocusSession {
+export interface Session {
   id: string;
   goal: string;
   durationMinutes: number;
@@ -26,7 +26,7 @@ export interface FocusSession {
 
 export type SessionSnapshot =
   | { status: "idle" }
-  | { status: "running" | "paused" | "completed"; session: FocusSession };
+  | { status: "running" | "paused" | "completed"; session: Session };
 
 export type SessionCommand =
   | { type: "session.start"; goal: string; durationMinutes: number }
@@ -45,9 +45,9 @@ export type RuntimeResponse =
   | { ok: true; snapshot: SessionSnapshot }
   | { ok: false; error: string };
 
-export const SESSION_STORAGE_KEY = "focus-guardian:session";
-export const SESSION_ALARM_NAME = "focus-guardian:session-end";
-export const SETTINGS_STORAGE_KEY = "focus-guardian:settings";
+export const SESSION_STORAGE_KEY = "keel:session";
+export const SESSION_ALARM_NAME = "keel:session-end";
+export const SETTINGS_STORAGE_KEY = "keel:settings";
 
 export const allowedExampleSchema = z.object({
   hostname: z.string().trim().min(1).max(253),
@@ -101,7 +101,7 @@ export const evaluationResponseSchema = z
 export type EvaluationRequest = z.infer<typeof evaluationRequestSchema>;
 export type EvaluationResponse = z.infer<typeof evaluationResponseSchema>;
 
-export type FocusAction =
+export type InterventionAction =
   | { type: "allow" }
   | { type: "toast"; evaluationId: string }
   | { type: "interstitial"; evaluationId: string; delaySeconds: 5 | 15 };
@@ -130,7 +130,7 @@ export type ExtensionRuntimeResponse =
   | RuntimeResponse
   | {
       ok: true;
-      action: FocusAction;
+      action: InterventionAction;
       sessionId: string | null;
       fingerprint: string;
       evaluation: EvaluationResponse | null;

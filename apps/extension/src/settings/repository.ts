@@ -1,7 +1,7 @@
 import {
   SETTINGS_STORAGE_KEY,
   type ExtensionSettings,
-} from "@focus-guardian/contracts";
+} from "@keel/contracts";
 
 const defaults: ExtensionSettings = {
   apiBaseUrl: import.meta.env.WXT_PUBLIC_API_BASE_URL || "http://localhost:3000",

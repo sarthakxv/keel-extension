@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import type { EvaluationResponse } from "@focus-guardian/contracts";
+import type { EvaluationResponse } from "@keel/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createStatusHudView, mountStatusHud } from "./mount";
 
@@ -46,16 +46,16 @@ describe("status HUD mount", () => {
   it("marks the host so page extraction can ignore the bar", () => {
     const hud = mountStatusHud();
     hud.render({ kind: "checking", hostname: "github.com" });
-    const host = document.querySelector("[data-focus-guardian-ui]");
-    expect(host?.getAttribute("data-focus-guardian-ui")).toBe("true");
+    const host = document.querySelector("[data-keel-ui]");
+    expect(host?.getAttribute("data-keel-ui")).toBe("true");
     hud.remove();
   });
 
   it("removes the bar when the session is no longer running", () => {
     const hud = mountStatusHud();
     hud.render({ kind: "checking", hostname: "github.com" });
-    expect(document.querySelector("[data-focus-guardian-ui]")).not.toBeNull();
+    expect(document.querySelector("[data-keel-ui]")).not.toBeNull();
     hud.render(null);
-    expect(document.querySelector("[data-focus-guardian-ui]")).toBeNull();
+    expect(document.querySelector("[data-keel-ui]")).toBeNull();
   });
 });

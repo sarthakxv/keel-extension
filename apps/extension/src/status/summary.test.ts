@@ -1,4 +1,4 @@
-import type { EvaluationResponse } from "@focus-guardian/contracts";
+import type { EvaluationResponse } from "@keel/contracts";
 import { describe, expect, it } from "vitest";
 import { alignmentSegments, formatPercent, statusHudCopy } from "./summary";
 

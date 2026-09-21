@@ -16,7 +16,7 @@ Evaluation runs only while `snapshot.status === "running"`. SPA URL changes are 
 
 ## Page text
 
-`extractPageContext` keeps hostname, title (≤200 chars), and ≤1,500 characters of visible main-content text. It drops forms, editors, scripts, chrome, hidden nodes, and `[data-focus-guardian-ui]`. Fingerprint is SHA-256 of `hostname\ntitle\nexcerpt`. Pages with no title and excerpt under 40 characters are skipped.
+`extractPageContext` keeps hostname, title (≤200 chars), and ≤1,500 characters of visible main-content text. It drops forms, editors, scripts, chrome, hidden nodes, and `[data-keel-ui]`. Fingerprint is SHA-256 of `hostname\ntitle\nexcerpt`. Pages with no title and excerpt under 40 characters are skipped.
 
 Jev treats page text as evidence, never as instructions. The API does not persist excerpts.
 
@@ -30,11 +30,11 @@ While a session is running, a bottom-right status bar shows the latest Jev align
 
 Intervene only on confident distraction: `alignment.value === "off_task"`, off_task probability ≥ 0.75, and distraction probability ≥ 0.75. Escalation counts intervention timestamps in the last 10 minutes: toast, then interstitial 5s, then interstitial 15s.
 
-"Continue anyway" records an override (max 3 `allowedExamples`) and clears the evaluation cache. Overlay and status UI mount in a closed shadow root marked `data-focus-guardian-ui`. Color tokens match `popup/theme.css`; overlay CSS is the string in `intervention/mount.ts`; status bar CSS is the string in `status/mount.ts`.
+"Continue anyway" records an override (max 3 `allowedExamples`) and clears the evaluation cache. Overlay and status UI mount in a closed shadow root marked `data-keel-ui`. Color tokens match `popup/theme.css`; overlay CSS is the string in `intervention/mount.ts`; status bar CSS is the string in `status/mount.ts`.
 
 ## API
 
-`POST /api/v1/evaluations` requires `x-focus-installation-id` (UUID). Body is `evaluationRequestSchema` (`.strict()`, ≤8,192 bytes). Jev via Vercel AI Gateway: model `typesafe-ai/jev`, `only: ["typesafe-ai"]`, and `zeroDataRetention` in production (Hobby plans reject ZDR; local omits it). The route aborts at 2.5s; the extension client aborts at 4s and treats failure as allow.
+`POST /api/v1/evaluations` requires `x-keel-installation-id` (UUID). Body is `evaluationRequestSchema` (`.strict()`, ≤8,192 bytes). Jev via Vercel AI Gateway: model `typesafe-ai/jev`, `only: ["typesafe-ai"]`, and `zeroDataRetention` in production (Hobby plans reject ZDR; local omits it). The route aborts at 2.5s; the extension client aborts at 4s and treats failure as allow.
 
 Rate limits hash installation id and client IP. Production requires Upstash and denies when Redis is missing or the check throws. Local non-production permits requests without Upstash.
 

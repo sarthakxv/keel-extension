@@ -4,7 +4,7 @@ import {
   type RuntimeResponse,
   type SessionCommand,
   type SessionSnapshot,
-} from "@focus-guardian/contracts";
+} from "@keel/contracts";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { remainingMs } from "../../src/session/model";

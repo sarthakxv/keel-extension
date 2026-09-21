@@ -1,6 +1,6 @@
-import type { EvaluationResponse } from "@focus-guardian/contracts";
+import type { EvaluationResponse } from "@keel/contracts";
 
-const CACHE_KEY = "focus-guardian:evaluation-cache";
+const CACHE_KEY = "keel:evaluation-cache";
 const CACHE_TTL_MS = 30 * 60_000;
 
 interface CacheEntry {

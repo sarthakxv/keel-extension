@@ -1,4 +1,4 @@
-import type { EvaluationResponse, FocusAction } from "@focus-guardian/contracts";
+import type { EvaluationResponse, InterventionAction } from "@keel/contracts";
 
 export const OFF_TASK_THRESHOLD = 0.75;
 export const DISTRACTION_THRESHOLD = 0.75;
@@ -16,7 +16,7 @@ export function isConfidentDistraction(response: EvaluationResponse): boolean {
 export function decideIntervention(
   response: EvaluationResponse,
   previousInterventions: number,
-): FocusAction {
+): InterventionAction {
   if (!isConfidentDistraction(response)) {
     return { type: "allow" };
   }

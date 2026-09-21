@@ -1,4 +1,4 @@
-import type { PageContext } from "@focus-guardian/contracts";
+import type { PageContext } from "@keel/contracts";
 
 const EXCLUDED_SELECTOR = [
   "script",
@@ -15,7 +15,7 @@ const EXCLUDED_SELECTOR = [
   "[contenteditable]",
   "[aria-hidden='true']",
   "[hidden]",
-  "[data-focus-guardian-ui]",
+  "[data-keel-ui]",
 ].join(",");
 
 const MAX_EXCERPT_LENGTH = 1_500;

@@ -1,16 +1,16 @@
 import {
   durationMinutesSchema,
   goalSchema,
-  type FocusSession,
+  type Session,
   type SessionSnapshot,
-} from "@focus-guardian/contracts";
+} from "@keel/contracts";
 
 const MINUTE_MS = 60_000;
 
 export function createSession(
   input: { id: string; goal: string; durationMinutes: number },
   now: number,
-): FocusSession {
+): Session {
   const goal = goalSchema.parse(input.goal);
   const durationMinutes = durationMinutesSchema.parse(input.durationMinutes);
 
@@ -34,7 +34,7 @@ export function createSession(
   };
 }
 
-export function remainingMs(session: FocusSession, now: number): number {
+export function remainingMs(session: Session, now: number): number {
   if (session.status === "paused") {
     return Math.max(0, session.pausedRemainingMs ?? 0);
   }

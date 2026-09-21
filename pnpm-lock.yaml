@@ -17,7 +17,7 @@ importers:
 
   apps/api:
     dependencies:
-      '@focus-guardian/contracts':
+      '@keel/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       '@upstash/ratelimit':
@@ -54,7 +54,7 @@ importers:
 
   apps/extension:
     dependencies:
-      '@focus-guardian/contracts':
+      '@keel/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       react:

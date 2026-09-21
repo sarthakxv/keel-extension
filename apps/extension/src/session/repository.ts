@@ -1,7 +1,7 @@
 import {
   SESSION_STORAGE_KEY,
   type SessionSnapshot,
-} from "@focus-guardian/contracts";
+} from "@keel/contracts";
 
 const idleSnapshot: SessionSnapshot = { status: "idle" };
 

@@ -1,10 +1,11 @@
 import {
   evaluationRequestSchema,
   pageContextSchema,
+  SESSION_ALARM_NAME,
   type ExtensionRuntimeRequest,
   type ExtensionRuntimeResponse,
   type RuntimeResponse,
-} from "@focus-guardian/contracts";
+} from "@keel/contracts";
 import { getCachedEvaluation, setCachedEvaluation } from "../src/evaluation/cache";
 import { requestEvaluation } from "../src/evaluation/client";
 import { decideIntervention } from "../src/evaluation/policy";
@@ -138,7 +139,7 @@ export default defineBackground(() => {
   });
 
   browser.alarms.onAlarm.addListener((alarm) => {
-    if (alarm.name === "focus-guardian:session-end") {
+    if (alarm.name === SESSION_ALARM_NAME) {
       void reconcilePersistedSession();
     }
   });
