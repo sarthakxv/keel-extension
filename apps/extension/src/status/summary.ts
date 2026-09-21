@@ -1,8 +1,4 @@
-import {
-  alignmentSchema,
-  type Alignment,
-  type EvaluationResponse,
-} from "@keel/contracts";
+import type { Alignment, EvaluationResponse } from "@keel/contracts";
 
 export type StatusHudState =
   | { kind: "checking"; hostname: string }
@@ -10,73 +6,46 @@ export type StatusHudState =
   | { kind: "result"; hostname: string; evaluation: EvaluationResponse };
 
 export interface StatusHudCopy {
-  eyebrow: string;
-  title: string;
-  confidence: string | null;
-  detail: string;
+  /** Visible pill text: a few words, no numbers. */
+  text: string;
+  /** Full context for screen readers and tooltips. */
   liveText: string;
   tone: Alignment | "checking" | "unavailable";
 }
 
-export const ALIGNMENT_LABELS: Record<Alignment, string> = {
-  on_task: "On task",
-  useful_detour: "Useful detour",
-  off_task: "Off task",
-  insufficient_evidence: "Not enough evidence",
+const PILL_TEXT: Record<Alignment, string> = {
+  on_task: "On track",
+  useful_detour: "Side track",
+  off_task: "Distracted, back to your task",
+  insufficient_evidence: "Unclear signal",
 };
-
-export const ALIGNMENT_ORDER = alignmentSchema.options;
 
 export function formatPercent(probability: number): string {
   const clamped = Math.max(0, Math.min(1, probability));
   return `${Math.round(clamped * 100)}%`;
 }
 
-export function alignmentSegments(evaluation: EvaluationResponse) {
-  return ALIGNMENT_ORDER.map((key) => {
-    const probability = evaluation.alignment.probabilities[key] ?? 0;
-    return {
-      key,
-      label: ALIGNMENT_LABELS[key],
-      probability,
-      percent: formatPercent(probability),
-    };
-  });
-}
-
 export function statusHudCopy(state: StatusHudState): StatusHudCopy {
   if (state.kind === "checking") {
     return {
-      eyebrow: "Jev",
-      title: "Reading this page",
-      confidence: null,
-      detail: state.hostname,
+      text: "Reading this page…",
       liveText: `Reading this page on ${state.hostname}`,
       tone: "checking",
     };
   }
   if (state.kind === "unavailable") {
     return {
-      eyebrow: "Jev",
-      title: "Couldn't classify",
-      confidence: null,
-      detail: state.hostname,
+      text: "Couldn't classify",
       liveText: `Couldn't classify ${state.hostname}`,
       tone: "unavailable",
     };
   }
 
-  const title = ALIGNMENT_LABELS[state.evaluation.alignment.value];
-  const confidence = formatPercent(
-    state.evaluation.alignment.probabilities[state.evaluation.alignment.value] ?? 0,
-  );
+  const text = PILL_TEXT[state.evaluation.alignment.value];
   const distraction = formatPercent(state.evaluation.distraction.probability);
   return {
-    eyebrow: "Jev",
-    title,
-    confidence,
-    detail: `${state.hostname} · distraction ${distraction}`,
-    liveText: `${title}, ${confidence}. Distraction ${distraction} on ${state.hostname}`,
+    text,
+    liveText: `${text} on ${state.hostname}. Distraction ${distraction}`,
     tone: state.evaluation.alignment.value,
   };
 }

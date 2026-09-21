@@ -1,19 +1,19 @@
+/* Hallmark · macrostructure: in-place system · tone: friendly-serious · anchor hue: neutral */
 :root {
-  --paper: #f4efe5;
-  --paper-inset: #e9e1d3;
-  --paper-raised: #faf6ee;
-  --graphite: #292522;
-  --graphite-soft: #665e57;
-  --graphite-faint: #6f655d;
-  --tomato: #ad4436;
-  --tomato-deep: #8e352b;
-  --olive: #65704c;
-  --warning: #a86f2d;
-  --line: rgba(56, 47, 40, 0.16);
-  --line-strong: rgba(56, 47, 40, 0.28);
-  color: var(--graphite);
+  --paper: #ffffff;
+  --paper-inset: #f4f4f1;
+  --ink: #1b1e20;
+  --ink-soft: #5c6267;
+  --ink-faint: #878d92;
+  --line: #e4e3de;
+  --line-strong: #d3d2cb;
+  --red: #b3372b;
+  --red-deep: #8f2a21;
+  --ok: #2e7d5b;
+  --warn: #b7791f;
+  color: var(--ink);
   background: var(--paper);
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   font-synthesis: none;
 }
 
@@ -25,17 +25,14 @@ body {
   width: 360px;
   min-height: 520px;
   margin: 0;
-  background:
-    linear-gradient(rgba(74, 60, 49, 0.025) 1px, transparent 1px),
-    var(--paper);
-  background-size: 100% 24px;
+  background: var(--paper);
 }
 
 .popup-shell {
   display: flex;
   flex-direction: column;
   min-height: 520px;
-  padding: 24px;
+  padding: 20px 20px 16px;
 }
 
 button,
@@ -51,48 +48,44 @@ button {
 button:focus-visible,
 textarea:focus-visible,
 input:focus-visible {
-  outline: 3px solid rgba(173, 68, 54, 0.24);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 
 .brand-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
 .brand-mark {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--tomato);
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.28);
+  background: var(--red);
 }
 
 .eyebrow {
   margin: 0;
-  color: var(--graphite-soft);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 650;
 }
 
 h1 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 500;
+  font-weight: 650;
 }
 
 .intro {
-  margin: 40px 0 32px;
+  margin: 28px 0 20px;
 }
 
 .intro h1 {
   max-width: 300px;
-  font-size: 35px;
-  line-height: 1.06;
-  letter-spacing: -0.025em;
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .session-form {
@@ -103,37 +96,33 @@ h1 {
 
 .session-form > label,
 legend {
-  margin-bottom: 8px;
-  color: var(--graphite-soft);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  margin-bottom: 6px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 textarea {
-  min-height: 78px;
+  min-height: 72px;
   resize: none;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 13px 14px;
-  color: var(--graphite);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--ink);
   background: var(--paper-inset);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 18px;
-  line-height: 1.35;
+  font-size: 15px;
+  line-height: 1.4;
 }
 
 textarea::placeholder {
-  color: var(--graphite-faint);
+  color: var(--ink-faint);
 }
 
 fieldset {
-  margin: 24px 0 0;
+  margin: 20px 0 0;
   padding: 0;
   border: 0;
 }
-
 
 .duration-row {
   display: grid;
@@ -144,81 +133,83 @@ fieldset {
 .duration,
 .custom-duration {
   display: flex;
-  min-height: 56px;
+  min-height: 52px;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  color: var(--graphite-soft);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--ink-soft);
   background: transparent;
+  font-size: 12px;
 }
 
 .duration strong {
-  color: var(--graphite);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 20px;
-  font-weight: 500;
-}
-
-.duration span,
-.custom-duration span {
-  font-size: 11px;
-  text-transform: uppercase;
-}
-
-.duration.active {
-  border-color: var(--tomato);
-  color: var(--tomato-deep);
-  background: rgba(173, 68, 54, 0.07);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 650;
 }
 
 .custom-duration {
   flex-direction: column;
   gap: 0;
+  font-weight: 600;
 }
 
 .custom-duration input {
   width: 54px;
   border: 0;
-  color: var(--graphite);
+  color: var(--ink);
   background: transparent;
   text-align: center;
+  font-weight: 650;
+}
+
+.duration.active {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: var(--paper-inset);
 }
 
 .primary-action,
 .quiet-action {
-  min-height: 46px;
-  border-radius: 9px;
+  min-height: 44px;
+  border-radius: 8px;
+  font-size: 13.5px;
   font-weight: 700;
 }
 
 .primary-action {
   margin-top: auto;
-  border: 1px solid var(--tomato-deep);
-  color: #fffaf2;
-  background: var(--tomato);
+  border: 1px solid var(--ink);
+  color: #fff;
+  background: var(--ink);
 }
 
 .primary-action:hover:not(:disabled) {
-  background: var(--tomato-deep);
+  background: #2a2e31;
 }
 
 .primary-action:disabled {
   cursor: not-allowed;
-  opacity: 0.46;
+  opacity: 0.45;
 }
 
 .quiet-action {
-  border: 1px solid var(--line);
-  color: var(--graphite-soft);
+  border: 1px solid var(--line-strong);
+  color: var(--ink-soft);
   background: transparent;
+}
+
+.quiet-action:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--ink-faint);
 }
 
 .error {
   margin: 12px 0;
-  color: var(--tomato-deep);
-  font-size: 12px;
+  color: var(--red-deep);
+  font-size: 12.5px;
 }
 
 .timer-view {
@@ -228,9 +219,9 @@ fieldset {
 .focus-seal {
   --progress: 1;
   position: relative;
-  width: 220px;
-  height: 220px;
-  margin: 24px auto 16px;
+  width: 200px;
+  height: 200px;
+  margin: 20px auto 14px;
 }
 
 .focus-seal svg {
@@ -244,7 +235,7 @@ fieldset {
 .ring-track,
 .ring-progress {
   fill: none;
-  stroke-width: 3;
+  stroke-width: 8;
 }
 
 .ring-track {
@@ -252,74 +243,68 @@ fieldset {
 }
 
 .ring-progress {
-  stroke: var(--tomato);
+  stroke: var(--ink);
   stroke-dasharray: 1;
   stroke-dashoffset: calc(1 - var(--progress));
   stroke-linecap: round;
   transition: stroke-dashoffset 180ms ease-out;
 }
 
-.tick-marks line {
-  stroke: var(--line-strong);
-  stroke-width: 1;
+.tick-marks {
+  display: none;
 }
 
 .seal-content {
   position: absolute;
-  inset: 28px;
+  inset: 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--line);
   border-radius: 50%;
-  background: rgba(250, 246, 238, 0.66);
 }
 
 .timer-digits {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 44px;
+  font-size: 38px;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
 }
 
 .timer-state {
-  margin-top: 4px;
-  color: var(--graphite-faint);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
+  margin-top: 2px;
+  color: var(--ink-faint);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: capitalize;
 }
 
 .goal-card {
-  min-height: 78px;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  padding: 14px 4px;
+  padding: 12px 4px;
   text-align: center;
 }
 
 .goal-card span {
-  color: var(--graphite-faint);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .goal-card h1 {
-  margin-top: 5px;
-  font-size: 20px;
-  line-height: 1.2;
+  margin-top: 4px;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .session-meta {
   display: flex;
   justify-content: space-between;
-  padding: 12px 4px 16px;
-  color: var(--graphite-faint);
-  font-size: 11px;
+  padding: 10px 4px 14px;
+  color: var(--ink-faint);
+  font-size: 12px;
 }
 
 .timer-actions {
@@ -333,11 +318,11 @@ fieldset {
 }
 
 .state-paused .ring-progress {
-  stroke: var(--warning);
+  stroke: var(--warn);
 }
 
 .state-completed .ring-progress {
-  stroke: var(--olive);
+  stroke: var(--ok);
   stroke-dashoffset: 0;
 }
 

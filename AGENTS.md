@@ -26,7 +26,7 @@ Background path: parse page → require a running session → cache key `session
 
 Missing, timed-out, or invalid evaluations resolve to `allow`. The content script repeats the active/sessionId/fingerprint check before mounting an intervention.
 
-While a session is running, a bottom-right status bar shows the latest Jev alignment, mix, and distraction for the current page. It starts as "Reading this page", then the evaluation, or "Couldn't classify" on failure. The bar hides while a toast or interstitial is mounted and returns after Continue anyway.
+While a session is running, a small bottom-right pill shows a few words of Jev status ("On track", "Side track", "Distracted, back to your task"). It starts as "Reading this page…", then the evaluation, or "Couldn't classify" on failure. Full context (hostname, distraction) lives in the pill's accessible label and tooltip, not the visible text. The pill hides while a toast or interstitial is mounted and returns after Continue anyway.
 
 Intervene only on confident distraction: `alignment.value === "off_task"`, off_task probability ≥ 0.75, and distraction probability ≥ 0.75. Escalation counts intervention timestamps in the last 10 minutes: toast, then interstitial 5s, then interstitial 15s.
 

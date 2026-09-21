@@ -1,6 +1,6 @@
 import type { EvaluationResponse } from "@keel/contracts";
 import { describe, expect, it } from "vitest";
-import { alignmentSegments, formatPercent, statusHudCopy } from "./summary";
+import { formatPercent, statusHudCopy } from "./summary";
 
 function evaluation(overrides?: Partial<EvaluationResponse>): EvaluationResponse {
   return {
@@ -30,97 +30,52 @@ describe("status HUD copy", () => {
 
   it("announces a checking state for the current host", () => {
     const copy = statusHudCopy({ kind: "checking", hostname: "github.com" });
-    expect(copy.title).toBe("Reading this page");
-    expect(copy.detail).toBe("github.com");
+    expect(copy.text).toBe("Reading this page…");
     expect(copy.liveText).toBe("Reading this page on github.com");
   });
 
   it("announces a missed evaluation without inventing a class", () => {
     const copy = statusHudCopy({ kind: "unavailable", hostname: "news.ycombinator.com" });
-    expect(copy.title).toBe("Couldn't classify");
-    expect(copy.detail).toBe("news.ycombinator.com");
+    expect(copy.text).toBe("Couldn't classify");
     expect(copy.liveText).toBe("Couldn't classify news.ycombinator.com");
   });
 
-  it("surfaces Jev alignment, confidence, and distraction", () => {
+  it("keeps visible pill text to a few words", () => {
     const copy = statusHudCopy({
       kind: "result",
       hostname: "github.com",
       evaluation: evaluation(),
     });
-    expect(copy.title).toBe("On task");
-    expect(copy.confidence).toBe("84%");
-    expect(copy.detail).toBe("github.com · distraction 18%");
-    expect(copy.liveText).toBe("On task, 84%. Distraction 18% on github.com");
+    expect(copy.text).toBe("On track");
+    expect(copy.liveText).toBe("On track on github.com. Distraction 18%");
     expect(copy.tone).toBe("on_task");
   });
 
-  it("labels every alignment class", () => {
-    expect(
-      statusHudCopy({
-        kind: "result",
-        hostname: "example.com",
-        evaluation: evaluation({
-          alignment: {
-            value: "useful_detour",
-            probabilities: {
-              on_task: 0.1,
-              useful_detour: 0.7,
-              off_task: 0.1,
-              insufficient_evidence: 0.1,
+  it("labels every alignment class in plain words", () => {
+    const titles: Array<[EvaluationResponse["alignment"]["value"], string]> = [
+      ["on_task", "On track"],
+      ["useful_detour", "Side track"],
+      ["off_task", "Distracted, back to your task"],
+      ["insufficient_evidence", "Unclear signal"],
+    ];
+    for (const [value, text] of titles) {
+      expect(
+        statusHudCopy({
+          kind: "result",
+          hostname: "example.com",
+          evaluation: evaluation({
+            alignment: {
+              value,
+              probabilities: {
+                on_task: 0.1,
+                useful_detour: 0.1,
+                off_task: 0.7,
+                insufficient_evidence: 0.1,
+              },
             },
-          },
-        }),
-      }).title,
-    ).toBe("Useful detour");
-    expect(
-      statusHudCopy({
-        kind: "result",
-        hostname: "example.com",
-        evaluation: evaluation({
-          alignment: {
-            value: "off_task",
-            probabilities: {
-              on_task: 0.05,
-              useful_detour: 0.05,
-              off_task: 0.88,
-              insufficient_evidence: 0.02,
-            },
-          },
-        }),
-      }).title,
-    ).toBe("Off task");
-    expect(
-      statusHudCopy({
-        kind: "result",
-        hostname: "example.com",
-        evaluation: evaluation({
-          alignment: {
-            value: "insufficient_evidence",
-            probabilities: {
-              on_task: 0.1,
-              useful_detour: 0.1,
-              off_task: 0.1,
-              insufficient_evidence: 0.7,
-            },
-          },
-        }),
-      }).title,
-    ).toBe("Not enough evidence");
-  });
-
-  it("keeps alignment mix in a stable order", () => {
-    expect(alignmentSegments(evaluation()).map((segment) => segment.key)).toEqual([
-      "on_task",
-      "useful_detour",
-      "off_task",
-      "insufficient_evidence",
-    ]);
-    expect(alignmentSegments(evaluation())[0]).toEqual({
-      key: "on_task",
-      label: "On task",
-      probability: 0.84,
-      percent: "84%",
-    });
+          }),
+        }).text,
+      ).toBe(text);
+    }
   });
 });

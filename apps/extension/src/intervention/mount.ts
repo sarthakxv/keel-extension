@@ -8,100 +8,93 @@ interface InterventionOptions {
 }
 
 const styles = `
+  /* Hallmark · overlay: quiet sheet · tone: friendly-serious */
   :host { all: initial; }
   * { box-sizing: border-box; }
   .fg-layer {
-    --paper: #f4efe5;
-    --paper-raised: #faf6ee;
-    --graphite: #292522;
-    --graphite-soft: #665e57;
-    --tomato: #ad4436;
-    --tomato-deep: #8e352b;
-    --line: rgba(56, 47, 40, 0.18);
+    --ink: #1b1e20;
+    --ink-soft: #5c6267;
+    --ink-faint: #878d92;
+    --paper: #ffffff;
+    --inset: #f4f4f1;
+    --line: #e4e3de;
+    --red: #b3372b;
+    --red-deep: #8f2a21;
     position: fixed;
     z-index: 2147483647;
-    color: var(--graphite);
-    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    color: var(--ink);
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   }
   .fg-layer.toast {
-    right: 24px;
-    bottom: 24px;
-    width: min(380px, calc(100vw - 32px));
+    right: 16px;
+    bottom: 16px;
+    width: min(360px, calc(100vw - 32px));
   }
   .fg-layer.interstitial {
     inset: 0;
     display: grid;
     place-items: center;
     padding: 24px;
-    background: rgba(31, 27, 24, 0.54);
-    backdrop-filter: blur(3px);
+    background: rgba(20, 19, 17, 0.5);
     overflow-y: auto;
   }
   .fg-sheet {
-    position: relative;
-    overflow: hidden;
     border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 22px;
-    background: var(--paper-raised);
-    box-shadow: 0 18px 60px rgba(22, 18, 15, 0.18);
+    border-radius: 12px;
+    padding: 20px;
+    background: var(--paper);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
   }
   .interstitial .fg-sheet {
-    width: min(440px, 100%);
+    width: min(420px, 100%);
     max-height: calc(100vh - 48px);
     margin: auto;
     overflow-y: auto;
-    padding: 32px;
+    padding: 28px;
   }
   .fg-seal {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 14px;
-    color: var(--tomato-deep);
-    font-size: 11px;
-    font-weight: 750;
-    letter-spacing: .12em;
-    text-transform: uppercase;
+    gap: 7px;
+    margin-bottom: 12px;
+    color: var(--ink-faint);
+    font-size: 12.5px;
+    font-weight: 600;
   }
-  .fg-dot { width: 9px; height: 9px; border: 2px solid var(--tomato); border-radius: 50%; }
+  .fg-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
   h2 {
     margin: 0;
-    color: var(--graphite);
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 27px;
-    font-weight: 500;
-    line-height: 1.12;
-    letter-spacing: -.015em;
+    font-size: 20px;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
   }
-  .interstitial h2 { font-size: 36px; }
-  p { margin: 10px 0 20px; color: var(--graphite-soft); font-size: 14px; line-height: 1.5; }
+  .interstitial h2 { font-size: 24px; }
+  p { margin: 8px 0 0; color: var(--ink-soft); font-size: 13.5px; line-height: 1.5; }
   .fg-goal {
-    margin: 14px 0 24px;
-    border-left: 2px solid var(--tomato);
-    padding-left: 12px;
-    color: var(--graphite);
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 18px;
-    line-height: 1.35;
+    margin: 12px 0 20px;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: var(--inset);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
   }
   .fg-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   button {
-    min-height: 42px;
+    min-height: 40px;
     border-radius: 8px;
-    padding: 0 15px;
-    font: 700 13px/1 Inter, ui-sans-serif, system-ui, sans-serif;
+    padding: 0 14px;
+    font: 700 13px/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
     cursor: pointer;
   }
-  button:focus-visible { outline: 3px solid rgba(173, 68, 54, .28); outline-offset: 2px; }
-  .fg-return { border: 1px solid var(--tomato-deep); color: #fffaf2; background: var(--tomato); }
-  .fg-return:hover { background: var(--tomato-deep); }
-  .fg-allow { border: 1px solid var(--line); color: var(--graphite-soft); background: transparent; }
+  button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .fg-return { border: 1px solid var(--red-deep); color: #fff; background: var(--red); }
+  .fg-return:hover { background: var(--red-deep); }
+  .fg-allow { border: 1px solid var(--line); color: var(--ink-soft); background: transparent; }
+  .fg-allow:hover { border-color: #d3d2cb; color: var(--ink); }
   .fg-allow:disabled { cursor: wait; opacity: .55; }
-  .fg-crack { position: absolute; top: -10px; right: 42px; width: 1px; height: 70px; background: var(--tomato); transform: rotate(31deg); opacity: .5; }
-  .fg-crack::after { content: ""; position: absolute; top: 34px; left: 0; width: 30px; height: 1px; background: var(--tomato); transform: rotate(-48deg); transform-origin: left; }
   .fg-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  @media (prefers-reduced-motion: reduce) { .fg-layer { backdrop-filter: none; } }
 `;
 
 function button(label: string, className: string): HTMLButtonElement {
@@ -203,12 +196,6 @@ export function mountIntervention(options: InterventionOptions): () => void {
     });
   }
 
-  if (options.action.type === "interstitial") {
-    const crack = document.createElement("span");
-    crack.className = "fg-crack";
-    crack.setAttribute("aria-hidden", "true");
-    sheet.append(crack);
-  }
   sheet.append(announcement, seal, title, copy, goal, actions);
   layer.append(sheet);
   shadow.append(style, layer);
