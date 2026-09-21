@@ -4,7 +4,7 @@ interface InterventionOptions {
   action: Exclude<FocusAction, { type: "allow" }>;
   goal: string;
   onAllow: () => void;
-  onReturn: () => void;
+  onReturn: () => boolean;
 }
 
 const styles = `
@@ -35,6 +35,7 @@ const styles = `
     padding: 24px;
     background: rgba(31, 27, 24, 0.54);
     backdrop-filter: blur(3px);
+    overflow-y: auto;
   }
   .fg-sheet {
     position: relative;
@@ -45,7 +46,13 @@ const styles = `
     background: var(--paper-raised);
     box-shadow: 0 18px 60px rgba(22, 18, 15, 0.18);
   }
-  .interstitial .fg-sheet { width: min(440px, 100%); padding: 32px; }
+  .interstitial .fg-sheet {
+    width: min(440px, 100%);
+    max-height: calc(100vh - 48px);
+    margin: auto;
+    overflow-y: auto;
+    padding: 32px;
+  }
   .fg-seal {
     display: inline-flex;
     align-items: center;
@@ -78,7 +85,7 @@ const styles = `
     font-size: 18px;
     line-height: 1.35;
   }
-  .fg-actions { display: flex; gap: 8px; }
+  .fg-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   button {
     min-height: 42px;
     border-radius: 8px;
@@ -93,6 +100,7 @@ const styles = `
   .fg-allow:disabled { cursor: wait; opacity: .55; }
   .fg-crack { position: absolute; top: -10px; right: 42px; width: 1px; height: 70px; background: var(--tomato); transform: rotate(31deg); opacity: .5; }
   .fg-crack::after { content: ""; position: absolute; top: 34px; left: 0; width: 30px; height: 1px; background: var(--tomato); transform: rotate(-48deg); transform-origin: left; }
+  .fg-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   @media (prefers-reduced-motion: reduce) { .fg-layer { backdrop-filter: none; } }
 `;
 
@@ -105,6 +113,7 @@ function button(label: string, className: string): HTMLButtonElement {
 }
 
 export function mountIntervention(options: InterventionOptions): () => void {
+  const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const host = document.createElement("div");
   host.dataset.focusGuardianUi = "true";
   const shadow = host.attachShadow({ mode: "closed" });
@@ -141,6 +150,12 @@ export function mountIntervention(options: InterventionOptions): () => void {
   const allowButton = button("Continue anyway", "fg-allow");
   actions.append(returnButton, allowButton);
 
+  const announcement = document.createElement("div");
+  announcement.className = "fg-sr-only";
+  announcement.setAttribute("role", "status");
+  announcement.setAttribute("aria-live", "polite");
+  announcement.textContent = `Focus check. This page looks outside your goal: ${options.goal}`;
+
   let remaining = options.action.type === "interstitial" ? options.action.delaySeconds : 0;
   let timer: ReturnType<typeof setInterval> | undefined;
   if (remaining > 0) {
@@ -159,10 +174,10 @@ export function mountIntervention(options: InterventionOptions): () => void {
   const cleanup = () => {
     if (timer) clearInterval(timer);
     host.remove();
+    if (previousFocus?.isConnected) previousFocus.focus();
   };
   returnButton.addEventListener("click", () => {
-    cleanup();
-    options.onReturn();
+    if (options.onReturn()) cleanup();
   });
   allowButton.addEventListener("click", () => {
     if (allowButton.disabled) return;
@@ -175,6 +190,7 @@ export function mountIntervention(options: InterventionOptions): () => void {
       const keyboardEvent = event as KeyboardEvent;
       if (keyboardEvent.key === "Escape") {
         keyboardEvent.preventDefault();
+        if (options.onReturn()) cleanup();
         return;
       }
       if (keyboardEvent.key !== "Tab") return;
@@ -193,7 +209,7 @@ export function mountIntervention(options: InterventionOptions): () => void {
     crack.setAttribute("aria-hidden", "true");
     sheet.append(crack);
   }
-  sheet.append(seal, title, copy, goal, actions);
+  sheet.append(announcement, seal, title, copy, goal, actions);
   layer.append(sheet);
   shadow.append(style, layer);
   document.documentElement.append(host);

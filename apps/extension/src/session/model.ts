@@ -55,6 +55,7 @@ export function reconcileSnapshot(snapshot: SessionSnapshot, now: number): Sessi
     status: "completed",
     session: {
       ...snapshot.session,
+      goal: "",
       status: "completed",
       endsAt: null,
       pausedRemainingMs: null,
@@ -121,6 +122,7 @@ export function endSnapshot(snapshot: SessionSnapshot, now: number): SessionSnap
     status: "completed",
     session: {
       ...snapshot.session,
+      goal: "",
       status: "completed",
       endsAt: null,
       pausedRemainingMs: null,
@@ -131,4 +133,3 @@ export function endSnapshot(snapshot: SessionSnapshot, now: number): SessionSnap
     },
   };
 }
-

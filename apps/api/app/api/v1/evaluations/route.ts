@@ -1,17 +1,20 @@
 import { evaluationRequestSchema } from "@focus-guardian/contracts";
 import { NextResponse } from "next/server";
-import { authenticateRequest } from "../../../../src/auth";
+import { z } from "zod";
 import { evaluateFocusPage } from "../../../../src/jev-evaluator";
 import { checkRateLimit } from "../../../../src/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  const identity = authenticateRequest(request);
-  if (!identity) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const installationId = z.string().uuid().safeParse(
+    request.headers.get("x-focus-installation-id"),
+  );
+  if (!installationId.success) {
+    return NextResponse.json({ error: "Missing installation ID" }, { status: 400 });
   }
-  if (!checkRateLimit(identity)) {
+  const ipAddress = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!(await checkRateLimit(installationId.data, ipAddress))) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
@@ -35,7 +38,9 @@ export async function POST(request: Request) {
   const timeout = setTimeout(() => controller.abort(), 2_500);
   try {
     return NextResponse.json(await evaluateFocusPage(parsed.data, controller.signal));
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown evaluation error";
+    console.error(`Focus evaluation failed: ${message}`);
     return NextResponse.json({ error: "Evaluation unavailable" }, { status: 503 });
   } finally {
     clearTimeout(timeout);

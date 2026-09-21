@@ -30,5 +30,28 @@ describe("page context extraction", () => {
     document.body.innerHTML = `<main><p>${"work ".repeat(500)}</p></main>`;
     expect(extractVisibleText(document).length).toBe(1_500);
   });
-});
 
+  it("excludes contenteditable variants", () => {
+    document.body.innerHTML = `
+      <main>
+        <p>Safe project context</p>
+        <div contenteditable>private bare editor text</div>
+        <div contenteditable="">private empty editor text</div>
+        <div contenteditable="plaintext-only">private plaintext editor text</div>
+      </main>
+    `;
+    const text = extractVisibleText(document);
+    expect(text).toBe("Safe project context");
+  });
+
+  it("excludes content hidden by an ancestor", () => {
+    document.body.innerHTML = `
+      <main>
+        <p>Visible project context</p>
+        <section style="display: none"><p>hidden private instructions</p></section>
+      </main>
+    `;
+    const text = extractVisibleText(document);
+    expect(text).toBe("Visible project context");
+  });
+});

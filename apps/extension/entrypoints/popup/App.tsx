@@ -1,7 +1,5 @@
 import {
   SESSION_STORAGE_KEY,
-  type ExtensionRuntimeRequest,
-  type ExtensionRuntimeResponse,
   type RuntimeRequest,
   type RuntimeResponse,
   type SessionCommand,
@@ -33,7 +31,6 @@ export function App() {
   const [snapshot, setSnapshot] = useState<SessionSnapshot>({ status: "idle" });
   const [goal, setGoal] = useState("");
   const [duration, setDuration] = useState(25);
-  const [accessToken, setAccessToken] = useState("");
   const [now, setNow] = useState(Date.now());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(true);
@@ -51,10 +48,6 @@ export function App() {
 
   useEffect(() => {
     void refresh();
-    const settingsRequest: ExtensionRuntimeRequest = { kind: "settings.get" };
-    void browser.runtime.sendMessage(settingsRequest).then((response: ExtensionRuntimeResponse) => {
-      if (response.ok && "settings" in response) setAccessToken(response.settings.accessToken);
-    });
     const clock = window.setInterval(() => setNow(Date.now()), 1_000);
     const handleStorageChange = (changes: Record<string, Browser.storage.StorageChange>) => {
       const change = changes[SESSION_STORAGE_KEY];
@@ -90,13 +83,6 @@ export function App() {
 
   async function handleStart(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (accessToken.trim()) {
-      const settingsRequest: ExtensionRuntimeRequest = {
-        kind: "settings.update",
-        settings: { accessToken: accessToken.trim() },
-      };
-      await browser.runtime.sendMessage(settingsRequest);
-    }
     await run({ type: "session.start", goal, durationMinutes: duration });
   }
 
@@ -130,6 +116,7 @@ export function App() {
                   className={duration === minutes ? "duration active" : "duration"}
                   key={minutes}
                   type="button"
+                  aria-pressed={duration === minutes}
                   onClick={() => setDuration(minutes)}
                 >
                   <strong>{minutes}</strong>
@@ -144,24 +131,14 @@ export function App() {
                   min={5}
                   max={180}
                   value={duration}
-                  onChange={(event) => setDuration(Number(event.target.value))}
+                  onChange={(event) => {
+                    const value = event.target.valueAsNumber;
+                    if (Number.isFinite(value)) setDuration(Math.min(180, Math.max(5, value)));
+                  }}
                 />
               </label>
             </div>
           </fieldset>
-          <details className="beta-access">
-            <summary>Jev distraction guard</summary>
-            <label htmlFor="access-token">Beta access key</label>
-            <input
-              id="access-token"
-              type="password"
-              autoComplete="off"
-              value={accessToken}
-              onChange={(event) => setAccessToken(event.target.value)}
-              placeholder="Paste your invite key"
-            />
-            <p>The timer works without a key. Page checks stay off until one is added.</p>
-          </details>
           {error ? <p className="error" role="alert">{error}</p> : null}
           <button className="primary-action" type="submit" disabled={busy || goal.trim().length < 3}>
             Begin focus
@@ -199,7 +176,7 @@ export function App() {
       </section>
       <section className="goal-card">
         <span>Your one intention</span>
-        <h1>{session.goal}</h1>
+        <h1>{session.goal || "Focus interval complete"}</h1>
       </section>
       <div className="session-meta" aria-label="Session statistics">
         <span>{session.durationMinutes} min interval</span>

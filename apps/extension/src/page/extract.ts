@@ -12,7 +12,7 @@ const EXCLUDED_SELECTOR = [
   "nav",
   "header",
   "footer",
-  "[contenteditable='true']",
+  "[contenteditable]",
   "[aria-hidden='true']",
   "[hidden]",
   "[data-focus-guardian-ui]",
@@ -20,9 +20,17 @@ const EXCLUDED_SELECTOR = [
 
 const MAX_EXCERPT_LENGTH = 1_500;
 
-function isVisible(element: Element): boolean {
-  const style = getComputedStyle(element);
-  return style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0";
+function isVisibleWithin(element: Element, root: Element): boolean {
+  let current: Element | null = element;
+  while (current) {
+    const style = getComputedStyle(current);
+    if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") {
+      return false;
+    }
+    if (current === root) break;
+    current = current.parentElement;
+  }
+  return true;
 }
 
 export function extractVisibleText(document: Document): string {
@@ -37,7 +45,7 @@ export function extractVisibleText(document: Document): string {
   while (walker.nextNode() && length < MAX_EXCERPT_LENGTH) {
     const node = walker.currentNode;
     const parent = node.parentElement;
-    if (!parent || parent.closest(EXCLUDED_SELECTOR) || !isVisible(parent)) continue;
+    if (!parent || parent.closest(EXCLUDED_SELECTOR) || !isVisibleWithin(parent, root)) continue;
     const text = node.textContent?.replace(/\s+/g, " ").trim();
     if (!text) continue;
     chunks.push(text);
@@ -63,4 +71,3 @@ export async function extractPageContext(document: Document): Promise<PageContex
   const fingerprint = await sha256(`${hostname}\n${title}\n${excerpt}`);
   return { hostname, title, excerpt, fingerprint };
 }
-

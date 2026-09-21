@@ -31,6 +31,8 @@ describe("focus session model", () => {
     const session = createSession({ id: "one", goal: "Write the brief", durationMinutes: 5 }, 0);
     const completed = reconcileSnapshot({ status: "running", session }, 5 * 60_000 + 1);
     expect(completed.status).toBe("completed");
+    if (completed.status !== "completed") throw new Error("Expected completed session");
+    expect(completed.session.goal).toBe("");
   });
 
   it("ends a session without preserving temporary examples", () => {
@@ -42,6 +44,6 @@ describe("focus session model", () => {
     expect(ended.status).toBe("completed");
     if (ended.status !== "completed") throw new Error("Expected completed session");
     expect(ended.session.allowedExamples).toEqual([]);
+    expect(ended.session.goal).toBe("");
   });
 });
-

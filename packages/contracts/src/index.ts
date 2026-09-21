@@ -106,22 +106,25 @@ export type FocusAction =
 
 export interface ExtensionSettings {
   apiBaseUrl: string;
-  accessToken: string;
+  installationId: string;
 }
 
 export type ExtensionRuntimeRequest =
   | RuntimeRequest
   | { kind: "page.evaluate"; page: PageContext }
   | {
+      kind: "intervention.shown";
+      evaluationId: string;
+      sessionId: string;
+    }
+  | {
       kind: "intervention.allow";
       evaluationId: string;
+      sessionId: string;
       page: Pick<PageContext, "hostname" | "title">;
-    }
-  | { kind: "settings.get" }
-  | { kind: "settings.update"; settings: Partial<ExtensionSettings> };
+    };
 
 export type ExtensionRuntimeResponse =
   | RuntimeResponse
-  | { ok: true; action: FocusAction }
-  | { ok: true; settings: ExtensionSettings }
+  | { ok: true; action: FocusAction; sessionId: string | null; fingerprint: string }
   | { ok: false; error: string };

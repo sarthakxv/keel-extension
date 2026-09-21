@@ -11,7 +11,7 @@ export async function requestEvaluation(
   settings: ExtensionSettings,
   request: EvaluationRequest,
 ): Promise<EvaluationResponse | null> {
-  if (!settings.accessToken || !settings.apiBaseUrl) {
+  if (!settings.apiBaseUrl || !settings.installationId) {
     return null;
   }
 
@@ -22,8 +22,8 @@ export async function requestEvaluation(
     const response = await fetch(`${settings.apiBaseUrl.replace(/\/$/, "")}/api/v1/evaluations`, {
       method: "POST",
       headers: {
-        authorization: `Bearer ${settings.accessToken}`,
         "content-type": "application/json",
+        "x-focus-installation-id": settings.installationId,
       },
       body: JSON.stringify(request),
       signal: controller.signal,
@@ -37,4 +37,3 @@ export async function requestEvaluation(
     clearTimeout(timeout);
   }
 }
-

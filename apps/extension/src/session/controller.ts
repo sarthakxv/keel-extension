@@ -13,6 +13,7 @@ import {
 } from "./model";
 import { readSession, writeSession } from "./repository";
 import { ESCALATION_WINDOW_MS } from "../evaluation/policy";
+import { clearEvaluationCache } from "../evaluation/cache";
 
 let operationQueue: Promise<unknown> = Promise.resolve();
 
@@ -45,6 +46,7 @@ export async function reconcilePersistedSession(now = Date.now()): Promise<Sessi
     const current = await readSession();
     const reconciled = reconcileSnapshot(current, now);
     if (reconciled !== current) {
+      await clearEvaluationCache();
       return persist(reconciled);
     }
     await syncAlarm(reconciled);
@@ -90,6 +92,14 @@ export async function executeSessionCommand(command: SessionCommand): Promise<Ru
           break;
       }
 
+      if (
+        command.type === "session.start" ||
+        command.type === "session.end" ||
+        command.type === "session.reset"
+      ) {
+        await clearEvaluationCache();
+      }
+
       return { ok: true, snapshot: await persist(next) };
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to update focus session";
@@ -99,12 +109,13 @@ export async function executeSessionCommand(command: SessionCommand): Promise<Ru
 }
 
 export async function recordOverride(
+  expectedSessionId: string,
   example: { hostname: string; title: string },
   now = Date.now(),
 ): Promise<SessionSnapshot> {
   return enqueue(async () => {
     const current = reconcileSnapshot(await readSession(), now);
-    if (current.status !== "running") return current;
+    if (current.status !== "running" || current.session.id !== expectedSessionId) return current;
     const withoutDuplicate = current.session.allowedExamples.filter(
       (item) => item.hostname !== example.hostname || item.title !== example.title,
     );
@@ -120,18 +131,20 @@ export async function recordOverride(
         },
       },
     };
+    await clearEvaluationCache();
     await persist(next);
     return next;
   });
 }
 
 export async function recordEvaluation(
+  expectedSessionId: string,
   shouldIntervene: boolean,
   now = Date.now(),
 ): Promise<{ snapshot: SessionSnapshot; previousInterventions: number }> {
   return enqueue(async () => {
     const current = reconcileSnapshot(await readSession(), now);
-    if (current.status !== "running") {
+    if (current.status !== "running" || current.session.id !== expectedSessionId) {
       return { snapshot: current, previousInterventions: 0 };
     }
     const recent = current.session.interventionTimestamps.filter(

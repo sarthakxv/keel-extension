@@ -3,13 +3,13 @@ import {
   pageContextSchema,
   type ExtensionRuntimeRequest,
   type ExtensionRuntimeResponse,
-  type FocusAction,
   type RuntimeResponse,
 } from "@focus-guardian/contracts";
 import { getCachedEvaluation, setCachedEvaluation } from "../src/evaluation/cache";
 import { requestEvaluation } from "../src/evaluation/client";
-import { decideIntervention, isConfidentDistraction } from "../src/evaluation/policy";
-import { readSettings, updateSettings } from "../src/settings/repository";
+import { decideIntervention } from "../src/evaluation/policy";
+import { evaluationCacheKey, matchesSession } from "../src/evaluation/identity";
+import { readSettings } from "../src/settings/repository";
 import {
   executeSessionCommand,
   recordEvaluation,
@@ -20,15 +20,22 @@ import { remainingMs } from "../src/session/model";
 
 async function evaluatePage(pageInput: unknown): Promise<ExtensionRuntimeResponse> {
   const page = pageContextSchema.safeParse(pageInput);
-  if (!page.success) return { ok: true, action: { type: "allow" } };
+  if (!page.success) {
+    return { ok: true, action: { type: "allow" }, sessionId: null, fingerprint: "" };
+  }
 
   const snapshotResponse = await executeSessionCommand({ type: "session.get" });
   if (!snapshotResponse.ok || snapshotResponse.snapshot.status !== "running") {
-    return { ok: true, action: { type: "allow" } };
+    return {
+      ok: true,
+      action: { type: "allow" },
+      sessionId: null,
+      fingerprint: page.data.fingerprint,
+    };
   }
 
   const session = snapshotResponse.snapshot.session;
-  const cacheKey = `${session.id}:${page.data.fingerprint}`;
+  const cacheKey = evaluationCacheKey(session, page.data.fingerprint);
   const cached = await getCachedEvaluation(cacheKey);
   const request = evaluationRequestSchema.parse({
     requestId: crypto.randomUUID(),
@@ -42,13 +49,31 @@ async function evaluatePage(pageInput: unknown): Promise<ExtensionRuntimeRespons
     allowedExamples: session.allowedExamples,
   });
   const response = cached ?? (await requestEvaluation(await readSettings(), request));
-  if (!response) return { ok: true, action: { type: "allow" } };
+  if (!response) {
+    return {
+      ok: true,
+      action: { type: "allow" },
+      sessionId: session.id,
+      fingerprint: page.data.fingerprint,
+    };
+  }
   if (!cached) await setCachedEvaluation(cacheKey, response);
 
-  const distraction = isConfidentDistraction(response);
-  const recorded = await recordEvaluation(distraction);
-  const action: FocusAction = decideIntervention(response, recorded.previousInterventions);
-  return { ok: true, action };
+  const latest = await executeSessionCommand({ type: "session.get" });
+  if (!latest.ok || !matchesSession(latest.snapshot, session.id)) {
+    return {
+      ok: true,
+      action: { type: "allow" },
+      sessionId: null,
+      fingerprint: page.data.fingerprint,
+    };
+  }
+
+  const recentCount = session.interventionTimestamps.filter(
+    (timestamp) => Date.now() - timestamp < 10 * 60_000,
+  ).length;
+  const action = decideIntervention(response, recentCount);
+  return { ok: true, action, sessionId: session.id, fingerprint: page.data.fingerprint };
 }
 
 export default defineBackground(() => {
@@ -60,21 +85,36 @@ export default defineBackground(() => {
     if (request.kind === "page.evaluate") {
       return evaluatePage(request.page);
     }
+    if (request.kind === "intervention.shown") {
+      if (typeof request.sessionId !== "string" || typeof request.evaluationId !== "string") {
+        return Promise.resolve({ ok: false, error: "Invalid intervention" } satisfies ExtensionRuntimeResponse);
+      }
+      const sessionId = request.sessionId;
+      return recordEvaluation(sessionId, true).then(
+        () => ({
+          ok: true,
+          action: { type: "allow" },
+          sessionId,
+          fingerprint: "",
+        }) satisfies ExtensionRuntimeResponse,
+      );
+    }
     if (request.kind === "intervention.allow") {
       const page = pageContextSchema.pick({ hostname: true, title: true }).safeParse(request.page);
       if (!page.success || typeof request.evaluationId !== "string") {
         return Promise.resolve({ ok: false, error: "Invalid override" } satisfies ExtensionRuntimeResponse);
       }
-      return recordOverride(page.data).then(
-        () => ({ ok: true, action: { type: "allow" } } satisfies ExtensionRuntimeResponse),
-      );
-    }
-    if (request.kind === "settings.get") {
-      return readSettings().then((settings) => ({ ok: true, settings }) satisfies ExtensionRuntimeResponse);
-    }
-    if (request.kind === "settings.update") {
-      return updateSettings(request.settings ?? {}).then(
-        (settings) => ({ ok: true, settings }) satisfies ExtensionRuntimeResponse,
+      if (typeof request.sessionId !== "string") {
+        return Promise.resolve({ ok: false, error: "Invalid session" } satisfies ExtensionRuntimeResponse);
+      }
+      const sessionId = request.sessionId;
+      return recordOverride(sessionId, page.data).then(
+        () => ({
+          ok: true,
+          action: { type: "allow" },
+          sessionId,
+          fingerprint: "",
+        }) satisfies ExtensionRuntimeResponse,
       );
     }
     return undefined;
