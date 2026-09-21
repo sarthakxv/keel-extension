@@ -21,7 +21,13 @@ import { remainingMs } from "../src/session/model";
 async function evaluatePage(pageInput: unknown): Promise<ExtensionRuntimeResponse> {
   const page = pageContextSchema.safeParse(pageInput);
   if (!page.success) {
-    return { ok: true, action: { type: "allow" }, sessionId: null, fingerprint: "" };
+    return {
+      ok: true,
+      action: { type: "allow" },
+      sessionId: null,
+      fingerprint: "",
+      evaluation: null,
+    };
   }
 
   const snapshotResponse = await executeSessionCommand({ type: "session.get" });
@@ -31,6 +37,7 @@ async function evaluatePage(pageInput: unknown): Promise<ExtensionRuntimeRespons
       action: { type: "allow" },
       sessionId: null,
       fingerprint: page.data.fingerprint,
+      evaluation: null,
     };
   }
 
@@ -55,6 +62,7 @@ async function evaluatePage(pageInput: unknown): Promise<ExtensionRuntimeRespons
       action: { type: "allow" },
       sessionId: session.id,
       fingerprint: page.data.fingerprint,
+      evaluation: null,
     };
   }
   if (!cached) await setCachedEvaluation(cacheKey, response);
@@ -66,6 +74,7 @@ async function evaluatePage(pageInput: unknown): Promise<ExtensionRuntimeRespons
       action: { type: "allow" },
       sessionId: null,
       fingerprint: page.data.fingerprint,
+      evaluation: null,
     };
   }
 
@@ -73,7 +82,13 @@ async function evaluatePage(pageInput: unknown): Promise<ExtensionRuntimeRespons
     (timestamp) => Date.now() - timestamp < 10 * 60_000,
   ).length;
   const action = decideIntervention(response, recentCount);
-  return { ok: true, action, sessionId: session.id, fingerprint: page.data.fingerprint };
+  return {
+    ok: true,
+    action,
+    sessionId: session.id,
+    fingerprint: page.data.fingerprint,
+    evaluation: response,
+  };
 }
 
 export default defineBackground(() => {
@@ -96,6 +111,7 @@ export default defineBackground(() => {
           action: { type: "allow" },
           sessionId,
           fingerprint: "",
+          evaluation: null,
         }) satisfies ExtensionRuntimeResponse,
       );
     }
@@ -114,6 +130,7 @@ export default defineBackground(() => {
           action: { type: "allow" },
           sessionId,
           fingerprint: "",
+          evaluation: null,
         }) satisfies ExtensionRuntimeResponse,
       );
     }

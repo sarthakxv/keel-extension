@@ -7,6 +7,8 @@ import {
 import { extractPageContext } from "../src/page/extract";
 import { mountIntervention } from "../src/intervention/mount";
 import { EvaluationScheduler } from "../src/page/scheduler";
+import { mountStatusHud } from "../src/status/mount";
+import type { StatusHudState } from "../src/status/summary";
 
 export default defineContentScript({
   matches: ["http://*/*", "https://*/*"],
@@ -17,27 +19,67 @@ export default defineContentScript({
     let currentGoal = "";
     let lastFingerprint = "";
     let lastUrl = location.href;
+    let lastHudState: StatusHudState | null = null;
     let removeIntervention: (() => void) | undefined;
     let observing = false;
+    const hud = mountStatusHud();
+
+    function currentHostname() {
+      return location.hostname || "this page";
+    }
+
+    function showHud(state: StatusHudState) {
+      lastHudState = state;
+      if (!removeIntervention) hud.render(state);
+    }
+
+    function restoreHud() {
+      if (active && lastHudState) hud.render(lastHudState);
+      else hud.render(null);
+    }
 
     async function evaluatePage() {
       if (!active || document.visibilityState === "hidden") return;
       const page = await extractPageContext(document);
-      if (!page || page.fingerprint === lastFingerprint) return;
+      if (!page) {
+        showHud({ kind: "unavailable", hostname: currentHostname() });
+        return;
+      }
+      if (page.fingerprint === lastFingerprint) return;
       lastFingerprint = page.fingerprint;
+      showHud({ kind: "checking", hostname: page.hostname });
       const request: ExtensionRuntimeRequest = { kind: "page.evaluate", page };
       const response = (await browser.runtime
         .sendMessage(request)
         .catch(() => undefined)) as ExtensionRuntimeResponse | undefined;
-      if (!response?.ok || !("action" in response) || response.action.type === "allow") return;
+      const stillThisPage = active && lastFingerprint === page.fingerprint;
+      if (!response?.ok || !("action" in response)) {
+        if (stillThisPage) {
+          lastFingerprint = "";
+          showHud({ kind: "unavailable", hostname: page.hostname });
+          scheduleEvaluation();
+        }
+        return;
+      }
       if (
         !active ||
         response.sessionId !== currentSessionId ||
         response.fingerprint !== page.fingerprint ||
         page.fingerprint !== lastFingerprint
-      ) return;
+      ) {
+        return;
+      }
+      if (response.evaluation) {
+        showHud({ kind: "result", hostname: page.hostname, evaluation: response.evaluation });
+      } else {
+        lastFingerprint = "";
+        showHud({ kind: "unavailable", hostname: page.hostname });
+        scheduleEvaluation();
+      }
+      if (response.action.type === "allow") return;
       const action = response.action;
       removeIntervention?.();
+      hud.render(null);
       removeIntervention = mountIntervention({
         action,
         goal: currentGoal,
@@ -48,10 +90,12 @@ export default defineContentScript({
             location.replace("about:blank");
           }
           removeIntervention = undefined;
+          restoreHud();
           return true;
         },
         onAllow: () => {
           removeIntervention = undefined;
+          restoreHud();
           const allowRequest: ExtensionRuntimeRequest = {
             kind: "intervention.allow",
             evaluationId: action.evaluationId,
@@ -92,6 +136,7 @@ export default defineContentScript({
       }
       if (active && (!wasActive || previousSessionId !== currentSessionId)) {
         lastFingerprint = "";
+        showHud({ kind: "checking", hostname: currentHostname() });
         scheduleEvaluation();
       }
       if (!active) {
@@ -99,8 +144,10 @@ export default defineContentScript({
         observer.disconnect();
         observing = false;
         lastFingerprint = "";
+        lastHudState = null;
         removeIntervention?.();
         removeIntervention = undefined;
+        hud.remove();
       }
     }
 
@@ -112,6 +159,7 @@ export default defineContentScript({
         lastFingerprint = "";
         removeIntervention?.();
         removeIntervention = undefined;
+        if (active) showHud({ kind: "checking", hostname: currentHostname() });
         scheduleEvaluation();
       }
     }, 1_000);
@@ -140,6 +188,7 @@ export default defineContentScript({
       document.removeEventListener("visibilitychange", handleVisibility);
       browser.storage.local.onChanged.removeListener(handleStorage);
       removeIntervention?.();
+      hud.remove();
     });
   },
 });

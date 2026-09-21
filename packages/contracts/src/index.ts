@@ -70,6 +70,8 @@ export const alignmentSchema = z.enum([
   "insufficient_evidence",
 ]);
 
+export type Alignment = z.infer<typeof alignmentSchema>;
+
 export const evaluationRequestSchema = z
   .object({
     requestId: z.string().uuid(),
@@ -126,5 +128,11 @@ export type ExtensionRuntimeRequest =
 
 export type ExtensionRuntimeResponse =
   | RuntimeResponse
-  | { ok: true; action: FocusAction; sessionId: string | null; fingerprint: string }
+  | {
+      ok: true;
+      action: FocusAction;
+      sessionId: string | null;
+      fingerprint: string;
+      evaluation: EvaluationResponse | null;
+    }
   | { ok: false; error: string };

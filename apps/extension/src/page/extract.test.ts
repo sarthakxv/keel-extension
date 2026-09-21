@@ -44,6 +44,20 @@ describe("page context extraction", () => {
     expect(text).toBe("Safe project context");
   });
 
+  it("excludes Focus Guardian UI from the excerpt", () => {
+    document.body.innerHTML = `
+      <main>
+        <h1>Project research</h1>
+        <div data-focus-guardian-ui="true">Reading this page On task 84%</div>
+        <p>Useful reference material for the current task.</p>
+      </main>
+    `;
+    const text = extractVisibleText(document);
+    expect(text).toContain("Project research");
+    expect(text).not.toContain("Reading this page");
+    expect(text).not.toContain("On task");
+  });
+
   it("excludes content hidden by an ancestor", () => {
     document.body.innerHTML = `
       <main>

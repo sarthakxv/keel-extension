@@ -11,6 +11,12 @@ const apiOrigin = (() => {
 
 export default defineConfig({
   modules: ["@wxt-dev/module-react"],
+  dev: {
+    server: {
+      port: 4173,
+      strictPort: true,
+    },
+  },
   manifest: {
     name: "Focus Guardian",
     description: "A goal-locked Pomodoro timer that adds friction to distracting pages.",
