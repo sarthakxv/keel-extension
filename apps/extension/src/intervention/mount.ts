@@ -133,13 +133,13 @@ export function mountIntervention(options: InterventionOptions): () => void {
   const dot = document.createElement("span");
   dot.className = "fg-dot";
   dot.setAttribute("aria-hidden", "true");
-  seal.append(dot, document.createTextNode("Focus check"));
+  seal.append(dot, document.createTextNode("Keel"));
 
   const title = document.createElement("h2");
   title.id = "fg-title";
-  title.textContent = "This looks outside your interval.";
+  title.textContent = "This page doesn't match your goal.";
   const copy = document.createElement("p");
-  copy.textContent = "You made one promise for this block of time:";
+  copy.textContent = "Your goal:";
   const goal = document.createElement("div");
   goal.className = "fg-goal";
   goal.textContent = options.goal;
@@ -154,7 +154,7 @@ export function mountIntervention(options: InterventionOptions): () => void {
   announcement.className = "fg-sr-only";
   announcement.setAttribute("role", "status");
   announcement.setAttribute("aria-live", "polite");
-  announcement.textContent = `Focus check. This page looks outside your goal: ${options.goal}`;
+  announcement.textContent = `This page doesn't match your goal: ${options.goal}`;
 
   let remaining = options.action.type === "interstitial" ? options.action.delaySeconds : 0;
   let timer: ReturnType<typeof setInterval> | undefined;

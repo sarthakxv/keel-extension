@@ -1,4 +1,4 @@
-# Focus Guardian
+# Keel
 
 Chromium MV3 Pomodoro that adds friction when Jev classifies a page as off-task. Local setup and the privacy copy live in README.md.
 

@@ -1,6 +1,6 @@
-# Focus Guardian
+# Keel
 
-Focus Guardian is a Chromium extension that pairs a goal-based Pomodoro timer with Jev page classification. While a focus session is running, it checks the visible content of visited pages and adds progressively stronger friction when a page appears unrelated to the current goal.
+Keel is a Chromium Pomodoro extension. You set a goal and start a timer. Jev classifies the page you are on. Keel shows a toast, then a timed overlay, when the page looks off-task.
 
 ## Local setup
 
@@ -24,7 +24,9 @@ Create `apps/extension/.env.local` for the extension:
 WXT_PUBLIC_API_BASE_URL=http://localhost:3000
 ```
 
-The extension is open to every installer; there are no invite or pasted access keys. Each installation creates an anonymous local UUID. The API combines that identifier with the request IP for shared Upstash rate limits. Production fails closed when Upstash is unavailable; local development permits requests without Upstash credentials.
+Anyone can install it. No invite or access keys. Each install mints an anonymous local UUID. The API combines that identifier with the request IP for shared Upstash rate limits. Production fails closed when Upstash is unavailable; local development permits requests without Upstash credentials.
+
+Zero Data Retention is requested automatically in production. Hobby AI Gateway plans reject that option, so local development omits it. Set `AI_GATEWAY_ZERO_DATA_RETENTION=true` or `false` to override.
 
 Run the API and extension in separate terminals:
 
@@ -32,6 +34,8 @@ Run the API and extension in separate terminals:
 pnpm dev:api
 pnpm dev
 ```
+
+The API listens on port 3000. The extension dev server uses 4173 so it does not intercept `localhost:3000`.
 
 For a production build:
 
@@ -46,4 +50,4 @@ Load `apps/extension/.output/chrome-mv3` as an unpacked extension from `chrome:/
 
 ## Privacy boundaries
 
-Page evaluation runs only during an active session. The extension sends the hostname, title, and at most 1,500 characters of visible page text. It excludes form controls, editable regions, scripts, styles, hidden content, Focus Guardian UI, URLs, and query strings. The API does not persist page content, and the Jev request asks Vercel AI Gateway for zero-data-retention routing.
+Page evaluation runs only during an active session. The extension sends the hostname, title, and at most 1,500 characters of visible page text. It excludes form controls, editable regions, scripts, styles, hidden content, Keel UI, URLs, and query strings. The API does not persist page content, and the Jev request asks Vercel AI Gateway for zero-data-retention routing.

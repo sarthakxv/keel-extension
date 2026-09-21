@@ -102,7 +102,7 @@ export async function executeSessionCommand(command: SessionCommand): Promise<Ru
 
       return { ok: true, snapshot: await persist(next) };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to update focus session";
+      const message = error instanceof Error ? error.message : "Couldn't update the session";
       return { ok: false, error: message };
     }
   });

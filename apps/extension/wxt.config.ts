@@ -18,8 +18,8 @@ export default defineConfig({
     },
   },
   manifest: {
-    name: "Focus Guardian",
-    description: "A goal-locked Pomodoro timer that adds friction to distracting pages.",
+    name: "Keel",
+    description: "A Pomodoro timer that interrupts pages that don't match your goal.",
     permissions: ["storage", "alarms"],
     host_permissions: [`${apiOrigin}/*`],
     incognito: "not_allowed",

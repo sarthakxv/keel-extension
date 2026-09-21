@@ -88,14 +88,6 @@ h1 {
   margin: 40px 0 32px;
 }
 
-.kicker {
-  margin: 0 0 8px;
-  color: var(--tomato);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 16px;
-  font-style: italic;
-}
-
 .intro h1 {
   max-width: 300px;
   font-size: 35px;

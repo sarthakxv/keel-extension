@@ -40,7 +40,7 @@ export function App() {
       setSnapshot(await sendCommand({ type: "session.get" }));
       setError(null);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to load your focus session");
+      setError(cause instanceof Error ? cause.message : "Couldn't load the session");
     } finally {
       setBusy(false);
     }
@@ -75,7 +75,7 @@ export function App() {
       setSnapshot(await sendCommand(command));
       setError(null);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Something interrupted the timer");
+      setError(cause instanceof Error ? cause.message : "Couldn't update the timer");
     } finally {
       setBusy(false);
     }
@@ -91,14 +91,13 @@ export function App() {
       <main className="popup-shell idle-view">
         <header className="brand-row">
           <span className="brand-mark" aria-hidden="true" />
-          <p className="eyebrow">Focus Guardian</p>
+          <p className="eyebrow">Keel</p>
         </header>
         <section className="intro">
-          <p className="kicker">One interval. One promise.</p>
-          <h1>What deserves your full attention?</h1>
+          <h1>Name the work you want to stay on.</h1>
         </section>
         <form className="session-form" onSubmit={(event) => void handleStart(event)}>
-          <label htmlFor="goal">Focus goal</label>
+          <label htmlFor="goal">Goal</label>
           <textarea
             id="goal"
             value={goal}
@@ -109,7 +108,7 @@ export function App() {
             required
           />
           <fieldset>
-            <legend>Focus length</legend>
+            <legend>Minutes</legend>
             <div className="duration-row">
               {durationOptions.map((minutes) => (
                 <button
@@ -141,7 +140,7 @@ export function App() {
           </fieldset>
           {error ? <p className="error" role="alert">{error}</p> : null}
           <button className="primary-action" type="submit" disabled={busy || goal.trim().length < 3}>
-            Begin focus
+            Start
           </button>
         </form>
       </main>
@@ -157,7 +156,7 @@ export function App() {
     <main className={`popup-shell timer-view state-${snapshot.status}`}>
       <header className="brand-row">
         <span className="brand-mark" aria-hidden="true" />
-        <p className="eyebrow">{isComplete ? "Interval complete" : isPaused ? "Focus paused" : "Focus protected"}</p>
+        <p className="eyebrow">{isComplete ? "Done" : isPaused ? "Paused" : "Running"}</p>
       </header>
       <section className="focus-seal" style={ringStyle} aria-label={`${formatTime(activeRemaining)} remaining`}>
         <svg viewBox="0 0 220 220" aria-hidden="true">
@@ -171,16 +170,19 @@ export function App() {
         </svg>
         <div className="seal-content">
           <span className="timer-digits">{isComplete ? "Done" : formatTime(activeRemaining)}</span>
-          <span className="timer-state">{isPaused ? "time held" : isComplete ? "promise kept" : "remaining"}</span>
+          <span className="timer-state">{isPaused ? "paused" : isComplete ? "finished" : "remaining"}</span>
         </div>
       </section>
       <section className="goal-card">
-        <span>Your one intention</span>
-        <h1>{session.goal || "Focus interval complete"}</h1>
+        <span>Goal</span>
+        <h1>{session.goal || "Session ended"}</h1>
       </section>
       <div className="session-meta" aria-label="Session statistics">
-        <span>{session.durationMinutes} min interval</span>
-        <span>{session.stats.interventionsShown} returns</span>
+        <span>{session.durationMinutes} min</span>
+        <span>
+          {session.stats.interventionsShown}{" "}
+          {session.stats.interventionsShown === 1 ? "interruption" : "interruptions"}
+        </span>
       </div>
       {error ? <p className="error" role="alert">{error}</p> : null}
       <div className="timer-actions">
@@ -190,7 +192,7 @@ export function App() {
             type="button"
             onClick={() => void run({ type: "session.reset" })}
           >
-            Start another
+            Start again
           </button>
         ) : (
           <>
@@ -200,10 +202,10 @@ export function App() {
               disabled={busy}
               onClick={() => void run({ type: isPaused ? "session.resume" : "session.pause" })}
             >
-              {isPaused ? "Resume focus" : "Pause"}
+              {isPaused ? "Resume" : "Pause"}
             </button>
             <button className="quiet-action" type="button" disabled={busy} onClick={() => void run({ type: "session.end" })}>
-              End interval
+              End
             </button>
           </>
         )}

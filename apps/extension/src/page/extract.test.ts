@@ -44,7 +44,7 @@ describe("page context extraction", () => {
     expect(text).toBe("Safe project context");
   });
 
-  it("excludes Focus Guardian UI from the excerpt", () => {
+  it("excludes Keel UI from the excerpt", () => {
     document.body.innerHTML = `
       <main>
         <h1>Project research</h1>
