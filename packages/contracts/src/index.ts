@@ -28,3 +28,21 @@ export type SessionSnapshot =
   | { status: "idle" }
   | { status: "running" | "paused" | "completed"; session: FocusSession };
 
+export type SessionCommand =
+  | { type: "session.start"; goal: string; durationMinutes: number }
+  | { type: "session.pause" }
+  | { type: "session.resume" }
+  | { type: "session.end" }
+  | { type: "session.get" };
+
+export type RuntimeRequest = {
+  kind: "session.command";
+  command: SessionCommand;
+};
+
+export type RuntimeResponse =
+  | { ok: true; snapshot: SessionSnapshot }
+  | { ok: false; error: string };
+
+export const SESSION_STORAGE_KEY = "focus-guardian:session";
+export const SESSION_ALARM_NAME = "focus-guardian:session-end";
